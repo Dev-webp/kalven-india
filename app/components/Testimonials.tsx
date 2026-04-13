@@ -97,6 +97,7 @@ export default function Testimonials() {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hoverRef = useRef(false);
+  const progRef = useRef(0);
 
   const next = () => setCurrent((prev) => (prev + 1) % items.length);
   const prev = () => setCurrent((prev) => (prev - 1 + items.length) % items.length);
@@ -112,12 +113,13 @@ export default function Testimonials() {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (tickRef.current) clearInterval(tickRef.current);
 
-    setProg(0);
+    progRef.current = 0;
     if (hoverRef.current) return;
 
     let p = 0;
     tickRef.current = setInterval(() => {
       p += 100 / (AUTO_DURATION / 100);
+      progRef.current = Math.min(100, p);
       setProg(Math.min(100, p));
     }, 100);
 

@@ -8,7 +8,7 @@ const stats = [
   { num: 7,   suffix: " days", label: "Avg hire time" },
 ];
 
-function useCountUp(ref, target, suffix, duration = 2000) {
+function useCountUp(ref: React.RefObject<HTMLDivElement | null>, target: number, suffix: string, duration = 2000) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -17,10 +17,10 @@ function useCountUp(ref, target, suffix, duration = 2000) {
         if (!entry.isIntersecting) return;
         observer.disconnect();
         const start = performance.now();
-        function tick(now) {
+        function tick(now: number) {
           const progress = Math.min((now - start) / duration, 1);
           const eased = 1 - Math.pow(1 - progress, 3);
-          el.textContent = Math.round(eased * target) + suffix;
+          if (el) el.textContent = Math.round(eased * target) + suffix;
           if (progress < 1) requestAnimationFrame(tick);
         }
         requestAnimationFrame(tick);
@@ -32,8 +32,9 @@ function useCountUp(ref, target, suffix, duration = 2000) {
   }, [ref, target, suffix, duration]);
 }
 
-function StatItem({ num, suffix, label }) {
-  const ref = useRef(null);
+function StatItem({ num, suffix, label }: { num: number; suffix: string; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+
   useCountUp(ref, num, suffix);
   return (
     <div className="stat-item">

@@ -199,22 +199,25 @@ export default function Services() {
     return () => window.removeEventListener("hashchange", applyHash);
   }, []); // Remove active dependency to prevent loops
 
+  // 🔥 FIXED: Sync hash and scroll when active service changes
+  useEffect(() => {
+    if (isReady) {
+      window.location.hash = `#services/${active.slug}`;
+      setTimeout(() => {
+        document.getElementById("srv-detail")?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 80);
+    }
+  }, [active.id, isReady]);
+
   // 🔥 FIXED: Navbar click handler sync
   function select(s: Service) {
     if (s.id === active.id) return;
     
     setActive(s);
     setAnimKey((k) => k + 1);
-    
-    // Update hash AND scroll simultaneously
-    window.location.hash = `#services/${s.slug}`;
-    
-    setTimeout(() => {
-      document.getElementById("srv-detail")?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }, 80);
   }
 
   // Skip render until ready (prevents flash)

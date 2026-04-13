@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { partners } from "../data";
 
 const trustItems = [
@@ -318,7 +319,7 @@ const Partners = () => {
             </div>
 
             <div className="partners-top-image">
-              <img src="/partner.webp" alt="Trusted business partners" />
+              <Image src="/partner.webp" alt="Trusted business partners" fill style={{ objectFit: "cover" }} />
             </div>
           </div>
 
@@ -327,11 +328,13 @@ const Partners = () => {
               {repeatedPartners.map((partner, index) => (
                 <div key={index} className="partner-logo-card">
                   <div className="partner-logo-badge">
-                    {partner.logo ? (
-                      <img
-                        src={partner.logo}
+                    {"logo" in partner && partner.logo ? (
+                      <Image
+                        src={partner.logo as string}
                         alt={partner.name}
                         className="partner-logo-image"
+                        width={26}
+                        height={26}
                       />
                     ) : (
                       <div
