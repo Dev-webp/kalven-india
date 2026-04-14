@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const services = [
   {
@@ -157,29 +157,21 @@ const services = [
   },
 ];
 
-
 type Service = (typeof services)[0];
 
 export default function Services() {
   const [active, setActive] = useState<Service>(services[0]);
   const [animKey, setAnimKey] = useState(0);
-  const [isReady, setIsReady] = useState(false); // ← NEW: Fix timing
+  const isInitialMount = useRef(true);
 
-  // 🔥 FIXED: Robust hash handling with immediate state sync
+  // Listen for hash changes to sync active service (e.g. navbar links)
   useEffect(() => {
     const applyHash = () => {
-      const raw = window.location.hash;
-      const slug = raw.replace("#services/", "").toLowerCase().trim();
-      
-      // Find service by slug (case-insensitive, robust)
-      const found = services.find((s) => 
-        s.slug === slug || s.slug.toLowerCase() === slug
-      );
-      
+      const slug = window.location.hash.replace("#services/", "").toLowerCase().trim();
+      const found = services.find((s) => s.slug === slug);
       if (found && found.id !== active.id) {
         setActive(found);
         setAnimKey((k) => k + 1);
-        // Scroll to detail with smooth behavior
         setTimeout(() => {
           document.getElementById("srv-detail")?.scrollIntoView({
             behavior: "smooth",
@@ -189,39 +181,25 @@ export default function Services() {
       }
     };
 
-    // Run immediately on mount AND on hashchange
-    applyHash();
     window.addEventListener("hashchange", applyHash);
-    
-    // Mark as ready after first run
-    setTimeout(() => setIsReady(true), 50);
-    
     return () => window.removeEventListener("hashchange", applyHash);
-  }, []); // Remove active dependency to prevent loops
+  }, [active.id]);
 
-  // 🔥 FIXED: Sync hash and scroll when active service changes
+  // Update hash when active service changes (but not on first mount)
   useEffect(() => {
-    if (isReady) {
-      window.location.hash = `#services/${active.slug}`;
-      setTimeout(() => {
-        document.getElementById("srv-detail")?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 80);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  }, [active.id, isReady]);
+    window.history.replaceState(null, "", `#services/${active.slug}`);
+  }, [active.slug]);
 
-  // 🔥 FIXED: Navbar click handler sync
   function select(s: Service) {
     if (s.id === active.id) return;
-    
     setActive(s);
     setAnimKey((k) => k + 1);
   }
 
-  // Skip render until ready (prevents flash)
-  if (!isReady) return <div style={{ minHeight: "500px" }} />;
   return (
     <section
       id="services"
@@ -385,7 +363,6 @@ export default function Services() {
 
         .d-cta:hover { transform: translateY(-2px); opacity: 0.96; }
 
-        /* bento */
         .bento {
           display: grid;
           grid-template-columns: repeat(12, 1fr);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { navLinks } from "../data";
 
 const TOP_BAR_H = 36;
@@ -647,7 +648,7 @@ const Navbar = () => {
 
       {/* NAVBAR */}
       <nav className={`kalven-nav ${scrolled ? "scrolled" : ""} ${!topBarVisible ? "top-hidden" : ""}`}>
-        <a href="/" className="nav-logo">
+        <Link href="/" className="nav-logo">
           <Image
             src="/kalven.png"
             alt="Kalven IT Group"
@@ -656,7 +657,7 @@ const Navbar = () => {
             style={{ objectFit: "contain", height: "auto" }}
             priority
           />
-        </a>
+        </Link>
 
         <div className="nav-links-desktop">
           {navLinks.map((link) => {
@@ -772,7 +773,7 @@ const Navbar = () => {
             📞 +91 99999 99999
           </a>
           <button className="mobile-cta">Get a Quote</button>
-          <p className="mobile-footer-note">India's trusted IT &amp; staffing partner</p>
+          <p className="mobile-footer-note">India&apos;s trusted IT &amp; staffing partner</p>
           <div className="mobile-footer-cities">
             <span className="city-tag">Bengaluru</span>
             <span className="city-tag">Mumbai</span>

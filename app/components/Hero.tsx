@@ -374,7 +374,7 @@ const Hero = () => (
       <div className="hero-left">
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          India's trusted IT & staffing partner
+          India&apos;s trusted IT & staffing partner
         </div>
 
         <h1 className="hero-h1">

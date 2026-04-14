@@ -36,7 +36,7 @@ const Partners = () => {
 
         .partners-top {
           display: grid;
-        grid-template-columns: 62% 38%;
+          grid-template-columns: 62% 38%;
           gap: 28px;
           align-items: stretch;
         }
@@ -49,18 +49,11 @@ const Partners = () => {
         }
 
         .partners-top-image {
+          position: relative;
           height: 100%;
           min-height: 320px;
           border-radius: 24px;
           overflow: hidden;
-          display: flex;
-        }
-
-        .partners-top-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
         }
 
         .partners-kicker {
@@ -254,12 +247,8 @@ const Partners = () => {
         }
 
         @keyframes partnerScroll {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-50%);
-          }
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
         }
 
         @media (max-width: 900px) {
@@ -286,7 +275,7 @@ const Partners = () => {
         }
       `}</style>
 
-      <section className="partners-premium">
+      <section id="partners" className="partners-premium">
         <div className="partners-shell">
           <div className="partners-top">
             <div className="partners-top-content">
@@ -319,7 +308,12 @@ const Partners = () => {
             </div>
 
             <div className="partners-top-image">
-              <Image src="/partner.webp" alt="Trusted business partners" fill style={{ objectFit: "cover" }} />
+              <Image
+                src="/partner.webp"
+                alt="Trusted business partners"
+                fill
+                style={{ objectFit: "cover" }}
+              />
             </div>
           </div>
 
@@ -364,13 +358,12 @@ const Partners = () => {
 
           <div className="partners-footer">
             <div className="footer-text">
-              <h4>Let’s build something impactful together</h4>
+              <h4>Let&apos;s build something impactful together</h4>
               <p>
                 Partner with us for scalable solutions, expert support, and
                 long-term business success.
               </p>
             </div>
-
             <button className="footer-btn">Contact Us →</button>
           </div>
         </div>

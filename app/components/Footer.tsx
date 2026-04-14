@@ -4,7 +4,6 @@ const Footer = () => {
   const quickLinks = footerLinks || ["Home", "About", "Services", "Careers", "Contact"];
   const services = ["Web Development", "Mobile Apps", "UI/UX Design", "Cloud Solutions"];
   const company = ["About Us", "Our Team", "Careers", "Blog"];
-  const contact = ["Hyderabad, India", "+91 9440467000", "admin@kalvenit.com"];
 
   return (
     <>

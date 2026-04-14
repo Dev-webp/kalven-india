@@ -157,7 +157,7 @@ const Contact = () => {
         }
       `}</style>
 
-      <section className="contact-section">
+      <section id="contact" className="contact-section">
         <div className="contact-container">
           {/* Main Centered Header */}
           <div className="contact-header">

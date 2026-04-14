@@ -12,7 +12,7 @@ const WhyUs = () => (
       background:
         "linear-gradient(180deg, #ffffff 0%, #faf8ff 52%, #ffffff 100%)",
     }}
-    id="why-us"
+    id="whyus"
   >
     <div
       style={{
