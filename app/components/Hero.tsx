@@ -1,490 +1,784 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState, useCallback } from "react";
 
-const stats = [
-  { num: 200, suffix: "+", label: "Clients served" },
-  { num: 95,  suffix: "%", label: "Placement rate" },
-  { num: 7,   suffix: " days", label: "Avg hire time" },
+/* ─────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────── */
+const steps = [
+  {
+    label: "Preparing",
+    desc: "Define the role before going live.",
+    full: "We align with your hiring team to craft precise job descriptions, establish realistic salary bands, and map out the full interview panel — so everyone is set up for success from day one.",
+    points: [
+      "Craft targeted job descriptions with must-have skills",
+      "Set transparent salary ranges & timelines",
+      "Map your interview panel and decision process",
+    ],
+    tip: "A well-defined job description reduces mis-hires by up to 40%.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <line x1="9" y1="7" x2="15" y2="7" />
+        <line x1="9" y1="11" x2="15" y2="11" />
+        <line x1="9" y1="15" x2="13" y2="15" />
+      </svg>
+    ),
+  },
+  {
+    label: "Onboarding",
+    desc: "Coordinate interviews seamlessly.",
+    full: "Our structured scheduling engine ensures candidates get timely invites, prep materials and panel context well before interviews — while hiring managers receive real-time consolidated feedback after every round.",
+    points: [
+      "Send structured interview invites with prep packs",
+      "Share panel bios so candidates feel confident",
+      "Collect real-time feedback on a shared scorecard",
+    ],
+    tip: "Structured feedback forms cut decision time in half across panels.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
+  {
+    label: "Hiring",
+    desc: "Close with a seamless offer experience.",
+    full: "We handle the final mile — offer letter drafting, contract dispatch, and pre-boarding checklists — so new hires feel welcomed before their first day. A buddy assignment and day-one agenda removes first-day anxiety entirely.",
+    points: [
+      "Draft & dispatch offer letters and contracts",
+      "Kick off pre-boarding tasks and IT setup",
+      "Set day-one agenda with buddy assignment",
+    ],
+    tip: "Pre-boarding checklists reduce early attrition by keeping excitement high.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+  },
+  {
+    label: "Sourcing",
+    desc: "Build a deep, qualified talent pipeline.",
+    full: "Using a multi-channel sourcing strategy — job boards, LinkedIn, employee referrals, ATS mining and Boolean passive-candidate searches — we ensure you never rely on a single pool of talent.",
+    points: [
+      "Post across job boards, LinkedIn & niche portals",
+      "Mine your ATS and activate employee referrals",
+      "Boolean search unlocks passive top-tier candidates",
+    ],
+    tip: "Referral hires are 4× more likely to stay beyond 2 years.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="7" />
+        <line x1="17" y1="17" x2="21" y2="21" />
+      </svg>
+    ),
+  },
+  {
+    label: "Selection",
+    desc: "Make objective, confident final decisions.",
+    full: "Structured debrief sessions, comparative scorecards, reference checks and background verification ensure the final hire is the right one — and a prompt, competitive offer keeps top candidates from slipping away.",
+    points: [
+      "Panel debrief with comparative scorecards",
+      "Reference checks & background verification",
+      "Prompt competitive offers that close top talent",
+    ],
+    tip: "Delays in extending offers cost companies 1 in 3 top candidates.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+  },
+  {
+    label: "Screening",
+    desc: "Filter fast — focus on the best profiles.",
+    full: "Every applicant is run through a rigorous must-have criteria checklist, followed by a short structured screening call. Shared scorecards mean your team only spends time on candidates who truly fit.",
+    points: [
+      "Resume review against must-have skill criteria",
+      "Short structured phone or video screening call",
+      "Shared scorecards keep the whole team aligned",
+    ],
+    tip: "Shared scorecards eliminate 60% of subjective bias in resume review.",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="9 11 12 14 22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+    ),
+  },
 ];
 
-function useCountUp(ref: React.RefObject<HTMLDivElement | null>, target: number, suffix: string, duration = 2000) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-        const start = performance.now();
-        function tick(now: number) {
-          const progress = Math.min((now - start) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          if (el) el.textContent = Math.round(eased * target) + suffix;
-          if (progress < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [ref, target, suffix, duration]);
+const VIOLET = "#7c3aed";
+const NAVY = "#1a1f5e";
+const SEG_COLORS = [VIOLET, NAVY, VIOLET, NAVY, VIOLET, NAVY];
+
+/* ─────────────────────────────────────────────
+   DONUT HELPERS
+───────────────────────────────────────────── */
+function polarToXY(cx: number, cy: number, r: number, deg: number): [number, number] {
+  const a = ((deg - 90) * Math.PI) / 180;
+  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
 }
 
-function StatItem({ num, suffix, label }: { num: number; suffix: string; label: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+function buildArc(cx: number, cy: number, R: number, ri: number, startDeg: number, endDeg: number): string {
+  const [x1, y1] = polarToXY(cx, cy, R, startDeg);
+  const [x2, y2] = polarToXY(cx, cy, R, endDeg);
+  const [x3, y3] = polarToXY(cx, cy, ri, endDeg);
+  const [x4, y4] = polarToXY(cx, cy, ri, startDeg);
+  const lg = endDeg - startDeg > 180 ? 1 : 0;
+  return `M${x1} ${y1} A${R} ${R} 0 ${lg} 1 ${x2} ${y2} L${x3} ${y3} A${ri} ${ri} 0 ${lg} 0 ${x4} ${y4}Z`;
+}
 
-  useCountUp(ref, num, suffix);
+interface DonutProps {
+  current: number;
+  onSelect: (i: number) => void;
+}
+
+function DonutChart({ current, onSelect }: DonutProps) {
+  const n = steps.length;
+  const gap = 5;
+  const slice = 360 / n;
+
+  // slightly larger donut
+  const cx = 120;
+  const cy = 120;
+  const R = 108;     // was 98
+  const ri = 60;     // was 54
+  const labelR = R + 18;
+
   return (
-    <div className="stat-item">
-      <div ref={ref} className="stat-num">0{suffix}</div>
-      <div className="stat-label">{label}</div>
-    </div>
+    <svg
+      viewBox="0 0 240 240"
+      width="100%"
+      style={{ maxWidth: 240, height: "auto", overflow: "visible" }}
+    >
+      {steps.map((step, i) => {
+        const start = i * slice + gap / 2;
+        const end = (i + 1) * slice - gap / 2;
+        const mid = (start + end) / 2;
+        const [ix, iy] = polarToXY(cx, cy, (R + ri) / 2, mid);
+        const [lx, ly] = polarToXY(cx, cy, labelR, mid);
+        const angle = mid % 360;
+        const anchor =
+          angle > 10 && angle < 170
+            ? "start"
+            : angle > 190 && angle < 350
+            ? "end"
+            : "middle";
+        const isActive = i === current;
+        const color = SEG_COLORS[i];
+        return (
+          <g key={i} style={{ cursor: "pointer" }} onClick={() => onSelect(i)}>
+            <path
+              d={buildArc(cx, cy, R, ri, start, end)}
+              fill={color}
+              opacity={isActive ? 1 : 0.18}
+              style={{ transition: "opacity 0.35s" }}
+            />
+            <g
+              transform={`translate(${ix - 9}, ${iy - 9})`}
+              style={{ opacity: isActive ? 1 : 0.45, transition: "opacity 0.35s" }}
+            >
+              {step.icon}
+            </g>
+            <text
+              x={lx}
+              y={ly}
+              textAnchor={anchor}
+              dominantBaseline="middle"
+              fontSize="8"
+              fontWeight="700"
+              fontFamily="'DM Sans',system-ui,sans-serif"
+              fill={isActive ? color : "#9ca3af"}
+              style={{ transition: "fill 0.35s" }}
+            >
+              {step.label}
+            </text>
+          </g>
+        );
+      })}
+      <circle cx={cx} cy={cy} r={ri - 3} fill="#f5f3ff" />
+      <text
+        x={cx}
+        y={cy - 9}
+        textAnchor="middle"
+        fontSize="9.5"
+        fontWeight="800"
+        fontFamily="'DM Sans',system-ui"
+        fill={NAVY}
+      >
+        Full Cycle
+      </text>
+      <text
+        x={cx}
+        y={cy + 6}
+        textAnchor="middle"
+        fontSize="8.5"
+        fontWeight="700"
+        fontFamily="'DM Sans',system-ui"
+        fill={VIOLET}
+      >
+        Recruiting
+      </text>
+    </svg>
   );
 }
 
-const Hero = () => (
-  <section id="home" style={{
-    display: "flex",
-    alignItems: "center",
-    background: "#ffffff",
-    padding: "20px 2rem 40px",
-    boxSizing: "border-box",
-    position: "relative",
-    overflow: "hidden",
-  }}>
-    {/* Background decoration blobs */}
-    <div style={{
-      position: "absolute", top: "-120px", right: "-100px",
-      width: "500px", height: "500px", borderRadius: "50%",
-      background: "radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%)",
-      pointerEvents: "none",
-    }} />
-    <div style={{
-      position: "absolute", bottom: "-80px", left: "-80px",
-      width: "350px", height: "350px", borderRadius: "50%",
-      background: "radial-gradient(circle, rgba(107,33,168,0.05) 0%, transparent 70%)",
-      pointerEvents: "none",
-    }} />
+/* ─────────────────────────────────────────────
+   PAGE EXPORT
+───────────────────────────────────────────── */
+export default function HomePage() {
+  const [current, setCurrent] = useState<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    <style>{`
-      .hero-grid {
-        max-width: 1160px;
-        margin: 0 auto;
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4rem;
-        align-items: center;
-        position: relative;
-        z-index: 1;
-      }
-      .hero-left { display: flex; flex-direction: column; gap: 1.4rem; }
+  const goTo = useCallback((i: number) => {
+    setCurrent(i);
+    if (timerRef.current !== null) clearInterval(timerRef.current);
+    timerRef.current = setInterval(
+      () => setCurrent((p) => (p + 1) % steps.length),
+      3800
+    );
+  }, []);
 
-      .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(107,33,168,0.07);
-        border: 1px solid rgba(107,33,168,0.18);
-        border-radius: 100px;
-        padding: 5px 15px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #5B21B6;
-        letter-spacing: 0.02em;
-        width: fit-content;
-      }
-      .hero-badge-dot {
-        width: 7px; height: 7px;
-        background: #7C3AED;
-        border-radius: 50%;
-        animation: blink 2s infinite;
-        flex-shrink: 0;
-      }
-      @keyframes blink {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.25; }
-      }
+  useEffect(() => {
+    timerRef.current = setInterval(
+      () => setCurrent((p) => (p + 1) % steps.length),
+      3800
+    );
+    return () => {
+      if (timerRef.current !== null) clearInterval(timerRef.current);
+    };
+  }, []);
 
-      .hero-h1 {
-        font-size: clamp(1.8rem, 3.5vw, 2.85rem);
-        font-weight: 800;
-        line-height: 1.15;
-        color: #1E1B4B;
-        margin: 0;
-        letter-spacing: -0.02em;
-      }
-      .hero-accent {
-        background: linear-gradient(135deg, #7C3AED, #4C1D95);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
+  const step = steps[current];
+  const activeColor = SEG_COLORS[current];
 
-      .hero-p {
-        font-size: 1rem;
-        color: #4B5563;
-        line-height: 1.75;
-        margin: 0;
-        max-width: 480px;
-      }
+  return (
+    <main
+      style={{
+        fontFamily: "'DM Sans', system-ui, sans-serif",
+        backgroundColor: "#ffffff", // overall white theme
+        color: "#0f172a",
+      }}
+    >
+      {/* ══════════════════════════════════════════════
+          HERO — 65 / 35 intro (white, reduced padding)
+      ══════════════════════════════════════════════ */}
+      <section
+        style={{
+          background: "#ffffff",
+          minHeight: "auto", // no forced full viewport height
+          padding: "32px 6vw", // reduced top/bottom space
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxSizing: "border-box",
+          position: "relative",
+          overflow: "hidden",
+          borderBottom: "1px solid #e5e7eb",
+        }}
+      >
+        {/* light grid overlay (very subtle) */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            opacity: 0.04,
+            backgroundImage:
+              "linear-gradient(#e5e7eb 1px,transparent 1px),linear-gradient(90deg,#e5e7eb 1px,transparent 1px)",
+            backgroundSize: "36px 36px",
+          }}
+        />
 
-      .hero-btns {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .btn-primary {
-        background: linear-gradient(135deg, #7C3AED, #6B21A8);
-        color: #fff;
-        border: none;
-        padding: 12px 26px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        letter-spacing: 0.01em;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: transform 0.18s, box-shadow 0.18s;
-        box-shadow: 0 4px 16px rgba(107,33,168,0.3);
-      }
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 22px rgba(107,33,168,0.4);
-      }
-      .btn-secondary {
-        background: #fff;
-        color: #6B21A8;
-        border: 1.5px solid rgba(107,33,168,0.28);
-        padding: 12px 26px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: transform 0.18s, background 0.18s;
-      }
-      .btn-secondary:hover {
-        background: #F5F3FF;
-        border-color: #7C3AED;
-        transform: translateY(-2px);
-      }
+        <style>{`
+          @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+          @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+          .step-anim { animation: fadeUp 0.28s ease forwards; }
 
-      .hero-stats {
-        display: flex;
-        gap: 0;
-        padding-top: 0.4rem;
-        flex-wrap: wrap;
-      }
-      .stat-item {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        padding: 0 1.5rem 0 0;
-      }
-      .stat-item:first-child { padding-left: 0; }
-      .stat-item + .stat-item {
-        padding-left: 1.5rem;
-        border-left: 1px solid rgba(107,33,168,0.14);
-      }
-      .stat-num {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #1E1B4B;
-        line-height: 1;
-        letter-spacing: -0.02em;
-      }
-      .stat-label {
-        font-size: 11px;
-        color: #6B7280;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-      }
+          .intro-grid {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            gap: 3.5rem;
+            width: 100%;
+            max-width: 1140px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+          }
+          @media (max-width: 860px) {
+            .intro-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          }
 
-      .hero-right {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        min-height: 400px;
-      }
+          .mini-card2 {
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px 10px 8px;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+          }
+          .mini-card2:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(124,58,237,0.1); }
+          .mini-card2.active { border-color: ${VIOLET}; box-shadow: 0 3px 14px rgba(124,58,237,0.14); }
 
-      .float-card {
-        position: absolute;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 6px 24px rgba(107,33,168,0.12);
-        padding: 9px 13px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #1E1B4B;
-        white-space: nowrap;
-        border: 1px solid rgba(107,33,168,0.1);
-      }
-      .float-card.card-1 {
-        top: 6%; left: -6%;
-        animation: floatY 3s ease-in-out infinite 0s;
-      }
-      .float-card.card-2 {
-        bottom: 10%; right: -6%;
-        animation: floatY 3s ease-in-out infinite 1s;
-      }
-      .float-card.card-3 {
-        top: 40%; right: -10%;
-        animation: floatY 3s ease-in-out infinite 2s;
-      }
-      @keyframes floatY {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-7px); }
-      }
-      .card-icon {
-        width: 28px; height: 28px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        flex-shrink: 0;
-      }
-      .card-icon.purple { background: #EDE9FE; }
-      .card-icon.green  { background: #D1FAE5; }
-      .card-icon.blue   { background: #DBEAFE; }
-      .card-sub { font-size: 11px; color: #6B7280; font-weight: 400; }
+          .prog-dot2 {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #d1d5db; border: none; padding: 0; cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+          }
+          .prog-dot2.active { background: ${VIOLET}; transform: scale(1.4); }
 
-      @media (max-width: 1024px) {
-        .hero-grid {
-          gap: 3rem;
-        }
-        .hero-right {
-          min-height: 350px;
-        }
-      }
+          .lc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1100px;
+            align-items: stretch;
+          }
+          .lc-left {
+            display: flex; flex-direction: column;
+            justify-content: space-between; gap: 14px;
+          }
+          .lc-right {
+            display: flex; flex-direction: column;
+            justify-content: space-between; gap: 12px;
+          }
+          .mini-row2 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+          }
+          @media (max-width: 860px) {
+            .lc-grid { grid-template-columns: 1fr !important; }
+            .lc-left { align-items: center; }
+          }
+          @media (max-width: 500px) {
+            .mini-row2 { grid-template-columns: repeat(2, 1fr) !important; }
+          }
+        `}</style>
 
-      @media (max-width: 860px) {
-        .hero-grid {
-          grid-template-columns: 1fr;
-          gap: 2.5rem;
-          text-align: center;
-        }
-        .hero-badge { margin: 0 auto; }
-        .hero-p { margin: 0 auto; }
-        .hero-btns { justify-content: center; }
-        .hero-stats { justify-content: center; }
-        .hero-right { 
-          min-height: 320px;
-          width: 100%;
-          max-width: 450px;
-          margin: 0 auto;
-        }
-        .float-card.card-1 { left: 10%; top: 5%; }
-        .float-card.card-2 { right: 10%; bottom: 5%; }
-        .float-card.card-3 { right: 5%; top: 35%; }
-      }
-
-      @media (max-width: 640px) {
-        .hero-grid {
-          gap: 2rem;
-        }
-        .hero-h1 { 
-          font-size: 1.6rem; 
-          text-align: center;
-        }
-        .hero-p { 
-          font-size: 0.95rem;
-          margin: 0 auto;
-        }
-        .hero-right { 
-          min-height: 300px;
-          max-width: 380px;
-        }
-        .float-card {
-          padding: 7px 10px;
-          font-size: 11px;
-        }
-        .card-icon {
-          width: 24px;
-          height: 24px;
-          font-size: 12px;
-        }
-        .float-card.card-1 { left: 5%; top: 10%; }
-        .float-card.card-2 { right: 5%; bottom: 10%; }
-        .float-card.card-3 { right: 0%; top: 40%; }
-      }
-
-      @media (max-width: 480px) {
-        #home {
-          padding: 10px 1rem 30px;
-        }
-        .hero-grid {
-          gap: 1.5rem;
-        }
-        .hero-h1 { 
-          font-size: 1.45rem;
-        }
-        .hero-btns {
-          justify-content: center;
-          gap: 8px;
-        }
-        .btn-primary,
-        .btn-secondary {
-          padding: 10px 20px;
-          font-size: 13px;
-        }
-        .hero-right {
-          min-height: 280px;
-          max-width: 100%;
-        }
-        .float-card {
-          padding: 6px 8px;
-          font-size: 10px;
-          border-radius: 8px;
-        }
-        .card-icon {
-          width: 20px;
-          height: 20px;
-          font-size: 11px;
-        }
-        .stat-item {
-          padding: 0 1rem 0 0;
-        }
-        .stat-item + .stat-item {
-          padding-left: 1rem;
-        }
-        .stat-num {
-          font-size: 1.35rem;
-        }
-        .stat-label {
-          font-size: 9px;
-        }
-      }
-    `}</style>
-
-    <div className="hero-grid">
-      {/* LEFT — Text content */}
-      <div className="hero-left">
-        <div className="hero-badge">
-          <span className="hero-badge-dot" />
-          India&apos;s trusted IT & staffing partner
-        </div>
-
-        <h1 className="hero-h1">
-          Building digital products &{" "}
-          <span className="hero-accent">hiring top talent</span>
-          {" "}— for India.
-        </h1>
-
-        <p className="hero-p">
-          From custom web & app development to end-to-end IT recruitment,
-          Kalven IT Group helps Indian businesses grow faster with the right
-          technology and the right people.
-        </p>
-
-        <div className="hero-btns">
-          <a href="#contact" className="btn-primary">Talk to us</a>
-          <a href="#services" className="btn-secondary">See our services →</a>
-        </div>
-
-        <div className="hero-stats">
-          {stats.map((s) => (
-            <StatItem key={s.label} num={s.num} suffix={s.suffix} label={s.label} />
-          ))}
-        </div>
-      </div>
-
-      {/* RIGHT — SVG Illustration + floating cards */}
-      <div className="hero-right">
-        <div className="float-card card-1">
-          <div className="card-icon purple">🚀</div>
+        <div className="intro-grid">
+          {/* LEFT */}
           <div>
-            <div className="card-sub">Projects delivered</div>
-            <div>200+ clients</div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "rgba(124,58,237,0.06)",
+                border: "1px solid rgba(167,139,250,0.3)",
+                borderRadius: 100,
+                padding: "5px 15px",
+                marginBottom: 18,
+                fontSize: 10,
+                fontWeight: 700,
+                color: VIOLET,
+                letterSpacing: "0.08em",
+              }}
+            >
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  background: VIOLET,
+                  borderRadius: "50%",
+                  animation: "blink 2s infinite",
+                }}
+              />
+              INDIA&apos;S LEADING IT STAFFING PARTNER
+            </div>
+
+            <h1
+              style={{
+                fontSize: "clamp(1.9rem, 3.8vw, 3.2rem)",
+                fontWeight: 800,
+                color: "#0f172a",
+                lineHeight: 1.12,
+                letterSpacing: "-0.03em",
+                margin: "0 0 14px",
+              }}
+            >
+              Connecting Great
+             
+                Talent
+           
+              to Great{" "}
+              <span
+                style={{
+                  background: "linear-gradient(90deg,#6366f1,#a855f7)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Organisations.
+              </span>
+            </h1>
+
+            <p
+              style={{
+                fontSize: "clamp(13px, 1.4vw, 15px)",
+                color: "#4b5563",
+                lineHeight: 1.85,
+                margin: "0 0 10px",
+                maxWidth: 580,
+              }}
+            >
+              Kalven IT Group is a premier full life-cycle recruiting firm headquartered in India, specialising in technology, engineering, and business transformation talent. Founded on the belief that the right hire changes everything, we partner with startups and Fortune-500 enterprises alike to build high-performing teams — faster, smarter, and with zero compromise on quality.
+            </p>
+
+            <p
+              style={{
+                fontSize: "clamp(12px, 1.25vw, 14px)",
+                color: "#6b7280",
+                lineHeight: 1.8,
+                margin: "0 0 24px",
+                maxWidth: 560,
+              }}
+            >
+              With over a decade of domain expertise, proprietary talent networks, and a consultative approach, Kalven IT Group has placed thousands of professionals across BFSI, SaaS, deep-tech, and infrastructure sectors. Every search begins with understanding your business — not just your job description.
+            </p>
+
+            <div
+              style={{
+                background: "#f9fafb",
+                border: "1px solid #e5e7eb",
+                borderRadius: 14,
+                padding: "12px 16px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "#6d28d9",
+                  fontWeight: 700,
+                  marginBottom: 4,
+                  letterSpacing: "0.06em",
+                }}
+              >
+                TRUSTED BY
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#111827",
+                  fontWeight: 600,
+                  lineHeight: 1.5,
+                }}
+              >
+                Startups · Scale-ups · Enterprise
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "#6b7280",
+                  marginTop: 3,
+                }}
+              >
+                BFSI · SaaS · Deep-tech · Infrastructure
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: show image from /public/image.png */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div
+              style={{
+                width: "100%",
+                aspectRatio: "4/5",
+                borderRadius: 22,
+                overflow: "hidden",
+                border: "1px solid #e5e7eb",
+                backgroundColor: "#f9fafb",
+                position: "relative",
+              }}
+            >
+              <Image
+                src="/kalvenit1.jpg"
+                alt="Kalven IT Group team"
+                fill
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="float-card card-2">
-          <div className="card-icon green">✅</div>
-          <div>
-            <div className="card-sub">Placement rate</div>
-            <div>95% success</div>
+      {/* ══════════════════════════════════════════════
+          SECTION 2 — RECRUITING LIFECYCLE
+      ══════════════════════════════════════════════ */}
+      <section
+        style={{
+          background: "#f9fafb",
+          padding: "40px 5vw 48px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxSizing: "border-box",
+        }}
+      >
+        <div className="lc-grid">
+          {/* LEFT */}
+          <div className="lc-left">
+            <div>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  background: "#ede9fe",
+                  border: "1px solid #c4b5fd",
+                  borderRadius: 100,
+                  padding: "4px 12px",
+                  marginBottom: 10,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: VIOLET,
+                  letterSpacing: "0.06em",
+                }}
+              >
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    background: VIOLET,
+                    borderRadius: "50%",
+                    animation: "blink 2s infinite",
+                  }}
+                />
+                HOW WE WORK
+              </div>
+              <h2
+                style={{
+                  fontSize: "clamp(1.3rem, 2.3vw, 1.95rem)",
+                  fontWeight: 800,
+                  color: NAVY,
+                  lineHeight: 1.2,
+                  letterSpacing: "-0.02em",
+                  margin: "0 0 8px",
+                }}
+              >
+                Full Life Cycle <span style={{ color: VIOLET }}>Recruiting</span>
+                <br />
+                — Done Right.
+              </h2>
+              <p
+                style={{
+                  fontSize: 12.5,
+                  color: "#6b7280",
+                  lineHeight: 1.65,
+                  margin: 0,
+                  maxWidth: 360,
+                }}
+              >
+                From first brief to day-one, our six-stage process ensures every hire is the right one — delivered on time, every time.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <DonutChart current={current} onSelect={goTo} />
+            </div>
+
+            <div style={{ display: "flex", gap: 7, justifyContent: "center" }}>
+              {steps.map((_, i) => (
+                <button
+                  key={i}
+                  className={`prog-dot2${i === current ? " active" : ""}`}
+                  onClick={() => goTo(i)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <div className="lc-right">
+            <div
+              key={current}
+              className="step-anim"
+              style={{
+                background: "#ffffff",
+                borderRadius: 16,
+                padding: "16px 18px",
+                border: `1.5px solid ${activeColor}28`,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 9,
+                boxShadow: "0 10px 25px rgba(15, 23, 42, 0.05)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    background: activeColor,
+                    borderRadius: 10,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {step.icon}
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: "#9ca3af",
+                      letterSpacing: "0.08em",
+                      marginBottom: 1,
+                    }}
+                  >
+                    STAGE {current + 1} OF {steps.length}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 800,
+                      color: NAVY,
+                    }}
+                  >
+                    {step.label}
+                  </div>
+                </div>
+              </div>
+
+              <p
+                style={{
+                  fontSize: 12.5,
+                  color: "#4b5563",
+                  lineHeight: 1.68,
+                  margin: 0,
+                }}
+              >
+                {step.full}
+              </p>
+
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                }}
+              >
+                {step.points.map((b, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 8,
+                      fontSize: 12.5,
+                      color: "#374151",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 17,
+                        height: 17,
+                        borderRadius: "50%",
+                        background: `${activeColor}16`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+                        <polyline
+                          points="2 6 5 9 10 3"
+                          stroke={activeColor}
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span style={{ lineHeight: 1.5 }}>{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div
+                style={{
+                  marginTop: "auto",
+                  background: `${activeColor}0c`,
+                  border: `1px solid ${activeColor}20`,
+                  borderRadius: 9,
+                  padding: "9px 13px",
+                  fontSize: 11.5,
+                  color: activeColor,
+                  fontWeight: 600,
+                  lineHeight: 1.55,
+                }}
+              >
+                💡 <strong>Pro tip:</strong> {step.tip}
+              </div>
+            </div>
+
+            <div className="mini-row2">
+              {steps.map((s, i) => (
+                <div
+                  key={i}
+                  className={`mini-card2${i === current ? " active" : ""}`}
+                  onClick={() => goTo(i)}
+                >
+                  <div
+                    style={{
+                      width: 24,
+                      height: 24,
+                      background: SEG_COLORS[i],
+                      borderRadius: 7,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 5,
+                      opacity: i === current ? 1 : 0.55,
+                    }}
+                  >
+                    {s.icon}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: i === current ? SEG_COLORS[i] : NAVY,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {s.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: "#9ca3af",
+                      marginTop: 2,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {s.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="float-card card-3">
-          <div className="card-icon blue">⚡</div>
-          <div>
-            <div className="card-sub">Avg hire time</div>
-            <div>7 days</div>
-          </div>
-        </div>
-
-        <svg
-          viewBox="0 0 420 420"
-          width="100%"
-          style={{ maxWidth: "100%", height: "auto" }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="210" cy="210" r="180" fill="rgba(124,58,237,0.03)" stroke="rgba(124,58,237,0.1)" strokeWidth="1" strokeDasharray="6 4" />
-          <circle cx="210" cy="210" r="130" fill="rgba(107,33,168,0.04)" stroke="rgba(107,33,168,0.08)" strokeWidth="1" />
-
-          <rect x="130" y="145" width="160" height="130" rx="14" fill="#fff" stroke="rgba(107,33,168,0.16)" strokeWidth="1.5" />
-          <rect x="130" y="145" width="160" height="32" rx="14" fill="#7C3AED" />
-          <rect x="130" y="161" width="160" height="16" fill="#7C3AED" />
-          <circle cx="148" cy="161" r="4" fill="rgba(255,255,255,0.45)" />
-          <circle cx="162" cy="161" r="4" fill="rgba(255,255,255,0.45)" />
-          <circle cx="176" cy="161" r="4" fill="rgba(255,255,255,0.45)" />
-
-          <rect x="148" y="192" width="90" height="8" rx="4" fill="#EDE9FE" />
-          <rect x="148" y="208" width="64" height="7" rx="3.5" fill="#F3F0FF" />
-          <rect x="148" y="222" width="76" height="7" rx="3.5" fill="#F3F0FF" />
-          <circle cx="256" cy="218" r="12" fill="#7C3AED" opacity="0.12" />
-          <circle cx="256" cy="218" r="7"  fill="#7C3AED" opacity="0.45" />
-
-          <rect x="130" y="255" width="160" height="20" rx="0" fill="rgba(237,233,254,0.45)" />
-          <rect x="148" y="261" width="40" height="6" rx="3" fill="#7C3AED" opacity="0.55" />
-          <rect x="196" y="261" width="30" height="6" rx="3" fill="#A855F7" opacity="0.35" />
-
-          {/* Node — top */}
-          <line x1="210" y1="145" x2="210" y2="90" stroke="rgba(107,33,168,0.18)" strokeWidth="1" strokeDasharray="4 3" />
-          <circle cx="210" cy="78" r="22" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5" />
-          <text x="210" y="74" textAnchor="middle" fontSize="15" fill="#7C3AED">💻</text>
-          <text x="210" y="86" textAnchor="middle" fontSize="9" fill="#5B21B6" fontWeight="600">Dev</text>
-
-          {/* Node — right */}
-          <line x1="290" y1="210" x2="342" y2="210" stroke="rgba(107,33,168,0.18)" strokeWidth="1" strokeDasharray="4 3" />
-          <circle cx="354" cy="210" r="22" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5" />
-          <text x="354" y="206" textAnchor="middle" fontSize="15" fill="#7C3AED">🤝</text>
-          <text x="354" y="218" textAnchor="middle" fontSize="9" fill="#5B21B6" fontWeight="600">Hire</text>
-
-          {/* Node — bottom */}
-          <line x1="210" y1="275" x2="210" y2="330" stroke="rgba(107,33,168,0.18)" strokeWidth="1" strokeDasharray="4 3" />
-          <circle cx="210" cy="342" r="22" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5" />
-          <text x="210" y="338" textAnchor="middle" fontSize="15" fill="#7C3AED">📈</text>
-          <text x="210" y="350" textAnchor="middle" fontSize="9" fill="#5B21B6" fontWeight="600">Grow</text>
-
-          {/* Node — left */}
-          <line x1="130" y1="210" x2="78" y2="210" stroke="rgba(107,33,168,0.18)" strokeWidth="1" strokeDasharray="4 3" />
-          <circle cx="66" cy="210" r="22" fill="#EDE9FE" stroke="#7C3AED" strokeWidth="1.5" />
-          <text x="66" y="206" textAnchor="middle" fontSize="15" fill="#7C3AED">☁️</text>
-          <text x="66" y="218" textAnchor="middle" fontSize="9" fill="#5B21B6" fontWeight="600">Cloud</text>
-
-          <circle cx="290" cy="100" r="5" fill="#A855F7" opacity="0.35" />
-          <circle cx="120" cy="310" r="4" fill="#7C3AED" opacity="0.25" />
-          <circle cx="330" cy="320" r="6" fill="#6D28D9" opacity="0.18" />
-          <circle cx="90"  cy="110" r="5" fill="#8B5CF6" opacity="0.3"  />
-        </svg>
-      </div>
-    </div>
-  </section>
-);
-
-export default Hero;
+      </section>
+    </main>
+  );
+}

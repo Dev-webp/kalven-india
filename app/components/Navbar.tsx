@@ -48,17 +48,12 @@ const Navbar = () => {
     return () => { document.body.style.paddingTop = ""; };
   }, []);
 
-  /* ── THE FIX: scroll first, then set hash ── */
   const handleServiceClick = (serviceSlug: string) => {
     setActiveLink("Services");
-
-    // 1. Scroll to the services section immediately
     const section = document.getElementById("services");
     if (section) {
       section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
-    // 2. After scroll begins, update hash so Services component picks it up
     setTimeout(() => {
       window.location.hash = `services/${serviceSlug}`;
     }, 120);
@@ -68,12 +63,10 @@ const Navbar = () => {
     setMenuOpen(false);
     setMobileServicesOpen(false);
     setActiveLink("Services");
-
     const section = document.getElementById("services");
     if (section) {
       section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-
     setTimeout(() => {
       window.location.hash = `services/${serviceSlug}`;
     }, 120);
@@ -170,7 +163,10 @@ const Navbar = () => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 2rem;
+
+          /* ↓ MORE HORIZONTAL BREATHING ROOM */
+          padding: 0 4rem;
+
           height: ${NAV_H}px;
           width: 100%;
           box-sizing: border-box;
@@ -193,21 +189,16 @@ const Navbar = () => {
           width: 3px;
           background: linear-gradient(180deg, #7C3AED, #4C1D95);
         }
-/* ── LOGO ── */
-.nav-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  flex-shrink: 0;
-  margin-top: 12px;
-}
 
-/* Apply only on large screens */
-@media (min-width: 768px) {
-  .nav-logo {
-    margin-left: 42px;
-  }
-}
+        /* ── LOGO ── */
+        .nav-logo {
+          display: flex;
+          align-items: center;
+          text-decoration: none;
+          flex-shrink: 0;
+          margin-top: 12px;
+        }
+
         /* ── DESKTOP LINKS ── */
         .nav-links-desktop {
           display: flex;
@@ -616,12 +607,21 @@ const Navbar = () => {
         }
 
         /* ── RESPONSIVE ── */
-        @media (max-width: 900px) { .nav-phone { display: none; } }
+        @media (min-width: 1280px) {
+          .kalven-nav { padding: 0 7rem; }
+        }
+        @media (max-width: 1024px) {
+          .kalven-nav { padding: 0 2.5rem; }
+        }
+        @media (max-width: 900px) {
+          .nav-phone { display: none; }
+          .kalven-nav { padding: 0 2rem; }
+        }
         @media (max-width: 768px) {
           .nav-links-desktop { display: none; }
           .nav-cta { display: none; }
           .hamburger { display: flex; }
-          .kalven-nav { padding: 0 1rem; }
+          .kalven-nav { padding: 0 1.25rem; }
           .top-bar { font-size: 12px; }
           .top-bar-extra { display: none !important; }
         }
