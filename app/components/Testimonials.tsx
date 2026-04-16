@@ -531,10 +531,6 @@ export default function Testimonials() {
           ))}
         </div>
 
-        {/* Progress bar */}
-        <div className="tm-prog-wrap">
-          <div className="tm-prog-bar" style={{ width: `${prog}%` }} />
-        </div>
       </div>
     </section>
   );
