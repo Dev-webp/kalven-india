@@ -697,13 +697,10 @@ const Navbar = () => {
         </div>
 
         <div className="nav-right">
-          <a href="tel:+919999999999" className="nav-phone">
-            📞 +91 99999 99999
+          <a href="tel:+919440467000" className="nav-phone">
+            📞 +91 9440467000
           </a>
-          <button className="nav-cta">
-            <span className="nav-cta-dot" />
-            <span>Get a Quote</span>
-          </button>
+         
           <button
             className={`hamburger ${menuOpen ? "open" : ""}`}
             onClick={() => setMenuOpen(true)}
@@ -769,8 +766,8 @@ const Navbar = () => {
         </div>
 
         <div className="mobile-bottom">
-          <a href="tel:+919999999999" className="mobile-phone">
-            📞 +91 99999 99999
+          <a href="tel:+919440467000" className="mobile-phone">
+            📞 +91 9440467000
           </a>
           <button className="mobile-cta">Get a Quote</button>
           <p className="mobile-footer-note">India&apos;s trusted IT &amp; staffing partner</p>

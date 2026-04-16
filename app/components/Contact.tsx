@@ -186,10 +186,19 @@ const Contact = () => {
                     <circle cx="12" cy="10" r="3" />
                   </svg>
                 </div>
-                <h4 className="contact-card-title">Address</h4>
-                <p className="contact-card-text">
-                  62/A, Sundari Reddy Bhavan, Ground Floor, Vengalrao Nagar, Hyderabad-500038.
-                </p>
+               <h4 className="contact-card-title">Address</h4>
+
+<p className="contact-card-text">
+  62/A, Sundari Reddy Bhavan, Ground Floor,<br />
+  Vengalrao Nagar, Hyderabad - 500038
+</p>
+
+<p className="contact-card-text mt-3">
+  16 & 17, Ground Floor,<br />
+  Raheja Arcade,<br />
+  5th Block, Koramangala,<br />
+  Bangalore, India - 560095
+</p>
               </div>
 
               <div className="contact-card">

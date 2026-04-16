@@ -178,7 +178,7 @@ const Footer = () => {
           <div className="kalven-footer-top">
             <div className="kalven-footer-brand">
               <div className="kalven-footer-logo">
-                Kalven <span>IT</span> Group India
+                 <span>kalven</span> Software Solutions Private Limited.,
               </div>
 
               <p className="kalven-footer-desc">
@@ -218,7 +218,7 @@ const Footer = () => {
 
               <div className="kalven-footer-col">
                 <h4>Contact</h4>
-                <a href="#">Hyderabad, India</a>
+                <a href="#">Hyderabad/Banglore, India</a>
                 <a href="tel:+919440467000">+91 9440467000</a>
                 <a href="mailto:admin@kalvenit.com">admin@kalvenit.com</a>
               </div>
