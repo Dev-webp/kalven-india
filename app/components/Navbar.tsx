@@ -636,12 +636,12 @@ const Navbar = () => {
         <div className="top-bar-inner">
           <span className="top-bar-badge">New</span>
           <span>IT Staffing &amp; Recruitment now available across India</span>
-          <span className="top-bar-link">Book now →</span>
+         
           <div className="top-bar-extra">
             <div className="top-bar-divider" />
             <span>Free consultation for startups &amp; SMEs</span>
             <div className="top-bar-divider" />
-            <span>Bengaluru · Hyderabad · Mumbai · Delhi · Chennai</span>
+            <span>Bengaluru · Hyderabad </span>
           </div>
         </div>
       </div>
