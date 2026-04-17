@@ -66,16 +66,16 @@ Hyderabad-500038, Telangana, India.`,
 ];
 
 export const partners = [
-  { name: "TechSpark Solutions", color: "#1a56db" },
-  { name: "GreenLeaf Retail", color: "#16a34a" },
-  { name: "FinEdge Capital", color: "#d97706" },
-  { name: "MediCare Plus", color: "#9333ea" },
-  { name: "BuildRight Infra", color: "#e11d48" },
-  { name: "LogixHub", color: "#0ea5e9" },
-  { name: "Saffron Foods", color: "#1a56db" },
-  { name: "EduPath India", color: "#16a34a" },
-  { name: "NovaTrade", color: "#d97706" },
-  { name: "PrimeHR Group", color: "#9333ea" },
+  { name: "Randstad ", color: "#1a56db" },
+  { name: "W3 Global", color: "#16a34a" },
+  { name: "BC Forward", color: "#d97706" },
+  { name: "Adventa", color: "#9333ea" },
+  { name: "TekWissen", color: "#e11d48" },
+  { name: "GradRight", color: "#0ea5e9" },
+  { name: "HDB Global", color: "#1a56db" },
+  { name: "Lancesoft ", color: "#16a34a" },
+  { name: "MindLance", color: "#d97706" },
+ 
 ];
 
 export const testimonials = [
